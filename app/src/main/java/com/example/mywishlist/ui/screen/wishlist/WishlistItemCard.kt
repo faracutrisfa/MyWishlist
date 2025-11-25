@@ -27,7 +27,7 @@ fun WishlistItemCard(
             .padding(bottom = 6.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF7F2FB) // soft lavender background
+            containerColor = Color(0xFFF7F2FB)
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 0.dp,
@@ -39,7 +39,7 @@ fun WishlistItemCard(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
 
-            // ============= Header Row =============
+            // Header Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -92,7 +92,7 @@ fun WishlistItemCard(
                 )
             }
 
-            // ============= Progress Section =============
+            // Progress Section
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
@@ -104,8 +104,8 @@ fun WishlistItemCard(
                         .fillMaxWidth()
                         .height(10.dp)
                         .clip(RoundedCornerShape(50)),
-                    color = Color(0xFF6750A4),        // progress fill
-                    trackColor = Color(0xFFE7E0F6)    // background
+                    color = Color(0xFF6750A4),
+                    trackColor = Color(0xFFE7E0F6)
                 )
 
                 Text(
@@ -115,7 +115,7 @@ fun WishlistItemCard(
                 )
             }
 
-            // ============= Bottom Row =============
+            // Bottom Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

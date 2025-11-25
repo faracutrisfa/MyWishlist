@@ -17,3 +17,4 @@ data class WishlistItem(
         get() = if (targetPrice <= 0) 0f
         else (savedAmount.toFloat() / targetPrice).coerceIn(0f, 1f)
 }
+

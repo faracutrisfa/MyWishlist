@@ -23,22 +23,25 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun WishlistScreen() {
     val context = LocalContext.current
+    // inisialisasi databse room
     val db = remember { WishlistDatabase.getInstance(context) }
     val dao = remember { db.wishlistDao() }
     val scope = rememberCoroutineScope()
 
+    // inisialisasi state
     var items by remember { mutableStateOf<List<WishlistItem>>(emptyList()) }
     var selectedCategory by remember { mutableStateOf<ItemCategory?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var savingsDialogFor by remember { mutableStateOf<WishlistItem?>(null) }
 
-    // collect dari Room
+    // collect dari Room Database
     LaunchedEffect(Unit) {
         dao.getAllItems().collectLatest { list ->
             items = list
         }
     }
 
+    // hitung berdasarkan kategori
     val filteredItems = remember(items, selectedCategory) {
         if (selectedCategory == null) items else items.filter { it.category == selectedCategory }
     }

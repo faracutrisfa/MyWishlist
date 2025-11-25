@@ -59,8 +59,8 @@ fun AddItemDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF1C1B1F),               // teks saat fokus
-                        unfocusedTextColor = Color(0xFF1C1B1F),             // teks saat tidak fokus
+                        focusedTextColor = Color(0xFF1C1B1F),
+                        unfocusedTextColor = Color(0xFF1C1B1F),
                         focusedBorderColor = Color(0xFF6750A4),
                         unfocusedBorderColor = Color(0xFFB1A7C9),
                         focusedLabelColor = Color(0xFF6750A4),
@@ -78,8 +78,8 @@ fun AddItemDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF1C1B1F),               // teks saat fokus
-                        unfocusedTextColor = Color(0xFF1C1B1F),             // teks saat tidak fokus
+                        focusedTextColor = Color(0xFF1C1B1F),
+                        unfocusedTextColor = Color(0xFF1C1B1F),
                         focusedBorderColor = Color(0xFF6750A4),
                         unfocusedBorderColor = Color(0xFFB1A7C9),
                         focusedLabelColor = Color(0xFF6750A4),
@@ -104,8 +104,8 @@ fun AddItemDialog(
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color(0xFF1C1B1F),               // teks saat fokus
-                            unfocusedTextColor = Color(0xFF1C1B1F),             // teks saat tidak fokus
+                            focusedTextColor = Color(0xFF1C1B1F),
+                            unfocusedTextColor = Color(0xFF1C1B1F),
                             focusedBorderColor = Color(0xFF6750A4),
                             unfocusedBorderColor = Color(0xFFB1A7C9),
                             focusedLabelColor = Color(0xFF6750A4),

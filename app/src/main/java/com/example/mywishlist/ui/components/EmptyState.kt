@@ -38,7 +38,7 @@ fun EmptyState() {
             Text(
                 text = "Tambah barang impianmu.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF6D6A7C) // abu-abu keunguan, lebih jelas
+                color = Color(0xFF6D6A7C)
             )
         }
     }
