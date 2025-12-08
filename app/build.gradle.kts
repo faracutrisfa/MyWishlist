@@ -59,6 +59,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.ui.graphics)
     kapt("androidx.room:room-compiler:2.6.1")
 
     testImplementation(libs.junit)

@@ -10,7 +10,7 @@ import com.example.mywishlist.ui.theme.MyWishlistTheme
 
 @Composable
 fun WishlistApp() {
-    MyWishlistTheme {
+    MyWishlistTheme(darkTheme = false) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background

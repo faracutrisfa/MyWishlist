@@ -4,126 +4,207 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
+import com.example.mywishlist.data.local.WishlistDatabase
 import com.example.mywishlist.data.model.ItemCategory
 import com.example.mywishlist.data.model.WishlistItem
-import com.example.mywishlist.data.local.WishlistDatabase
 import com.example.mywishlist.ui.components.EmptyState
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WishlistScreen() {
+
     val context = LocalContext.current
-    // inisialisasi databse room
     val db = remember { WishlistDatabase.getInstance(context) }
     val dao = remember { db.wishlistDao() }
     val scope = rememberCoroutineScope()
 
-    // inisialisasi state
     var items by remember { mutableStateOf<List<WishlistItem>>(emptyList()) }
     var selectedCategory by remember { mutableStateOf<ItemCategory?>(null) }
+    var sortOption by remember { mutableStateOf(SortOption.NAME) }
+    var sortExpanded by remember { mutableStateOf(false) }
+
     var showAddDialog by remember { mutableStateOf(false) }
     var savingsDialogFor by remember { mutableStateOf<WishlistItem?>(null) }
+    var deleteTarget by remember { mutableStateOf<WishlistItem?>(null) }
 
-    // collect dari Room Database
+    val listState = rememberLazyListState()
+
     LaunchedEffect(Unit) {
         dao.getAllItems().collectLatest { list ->
             items = list
         }
     }
 
-    // hitung berdasarkan kategori
-    val filteredItems = remember(items, selectedCategory) {
-        if (selectedCategory == null) items else items.filter { it.category == selectedCategory }
+    val filteredItems = remember(items, selectedCategory, sortOption) {
+        val base = if (selectedCategory == null) items
+        else items.filter { it.category == selectedCategory }
+
+        when (sortOption) {
+            SortOption.NAME -> base.sortedBy { it.name.lowercase() }
+            SortOption.PROGRESS -> base.sortedByDescending { it.progress }
+            SortOption.TARGET_LOW -> base.sortedBy { it.targetPrice }
+            SortOption.REMAINING_LOW -> base.sortedBy { it.targetPrice - it.savedAmount }
+        }
     }
 
+    val totalTarget = remember(items) { items.sumOf { it.targetPrice } }
+    val totalSaved = remember(items) { items.sumOf { it.savedAmount } }
+
     Scaffold(
-        containerColor = Color(0xFFF7F2FB), // Background lembut
         topBar = {
-            Surface(
-                shadowElevation = 4.dp,
-                color = Color(0xFF6750A4),
-                tonalElevation = 8.dp
-            ) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "Wishlist Nabung",
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "MyWishlist",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.SemiBold
                         )
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xFF6750A4),
-                        titleContentColor = Color.White
                     )
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color(0xFF6750A4),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 )
-            }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                shape = RoundedCornerShape(14.dp),
                 containerColor = Color(0xFF6750A4),
-                contentColor = Color.White
+                contentColor = Color.White,
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Text(
-                    "+",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                )
+                Icon(Icons.Default.Add, contentDescription = "Tambah item")
             }
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
                 .fillMaxSize()
+                .background(Color(0xFFF5F3FF)) // soft ungu background
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
 
-            Spacer(modifier = Modifier.height(12.dp))
+                // SUMMARY
+                SummaryHeader(totalTarget = totalTarget, totalSaved = totalSaved)
 
-            // Filter kategori
-            CategoryFilterRow(
-                selectedCategory = selectedCategory,
-                onCategorySelected = { selectedCategory = it }
-            )
+                // FILTER KATEGORI
+                CategoryFilterRow(
+                    selectedCategory = selectedCategory,
+                    onCategorySelected = { selectedCategory = it }
+                )
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            if (filteredItems.isEmpty()) {
-                EmptyState()
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier.fillMaxSize()
+                // SORT AREA
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    items(filteredItems, key = { it.id }) { item ->
-                        WishlistItemCard(
-                            item = item,
-                            onTogglePurchased = { isPurchased ->
-                                scope.launch {
-                                    dao.updateItem(item.copy(isPurchased = isPurchased))
-                                }
-                            },
-                            onAddSavingsClick = { savingsDialogFor = item }
+                    Text(
+                        text = "Daftar wishlist",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold
                         )
+                    )
+
+                    Box {
+                        OutlinedButton(
+                            onClick = { sortExpanded = true },
+                            shape = RoundedCornerShape(999.dp),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = Color(0xFFF3EDF7)
+                            ),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Tune,
+                                contentDescription = null,
+                                tint = Color(0xFF4A3DB5)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = sortOption.label,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = Color(0xFF4A3DB5)
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = sortExpanded,
+                            onDismissRequest = { sortExpanded = false },
+                            containerColor = Color.White
+                        ) {
+                            SortOption.values().forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option.label) },
+                                    onClick = {
+                                        sortExpanded = false
+                                        sortOption = option
+                                        scope.launch {
+                                            listState.animateScrollToItem(0)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // LIST
+                if (filteredItems.isEmpty()) {
+                    EmptyState()
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        state = listState,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(filteredItems, key = { it.id }) { item ->
+                            WishlistItemCard(
+                                item = item,
+                                onTogglePurchased = { isPurchased ->
+                                    scope.launch {
+                                        dao.updateItem(item.copy(isPurchased = isPurchased))
+                                    }
+                                },
+                                onAddSavingsClick = { savingsDialogFor = item },
+                                onDeleteClick = { deleteTarget = item }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 
-    // Tambah Item
+    // Dialog – tambah item
     if (showAddDialog) {
         AddItemDialog(
             onDismiss = { showAddDialog = false },
@@ -142,18 +223,113 @@ fun WishlistScreen() {
         )
     }
 
-    // Tambah Tabungan
-    savingsDialogFor?.let { targetItem ->
+    // Dialog – tambah tabungan
+    savingsDialogFor?.let { item ->
         AddSavingsDialog(
-            item = targetItem,
+            item = item,
             onDismiss = { savingsDialogFor = null },
-            onConfirm = { extraSavings ->
+            onConfirm = { extra ->
                 scope.launch {
-                    val newAmount = targetItem.savedAmount + extraSavings
-                    dao.updateItem(targetItem.copy(savedAmount = newAmount))
+                    dao.updateItem(item.copy(savedAmount = item.savedAmount + extra))
                 }
                 savingsDialogFor = null
             }
         )
+    }
+
+    // Dialog – hapus
+    deleteTarget?.let { target ->
+        AlertDialog(
+            onDismissRequest = { deleteTarget = null },
+            title = { Text("Hapus Wishlist") },
+            text = { Text("Yakin ingin menghapus \"${target.name}\" dari wishlist?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch { dao.deleteItem(target) }
+                        deleteTarget = null
+                    }
+                ) {
+                    Text("Hapus", color = Color(0xFFB3261E))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteTarget = null }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun SummaryHeader(
+    totalTarget: Long,
+    totalSaved: Long
+) {
+    val remaining = (totalTarget - totalSaved).coerceAtLeast(0L)
+    val progress = if (totalTarget > 0) totalSaved.toFloat() / totalTarget.toFloat() else 0f
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF6750A4)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF6750A4),
+                            Color(0xFF4A3DB5)
+                        )
+                    )
+                )
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Ringkasan tabungan",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+
+            Text(
+                text = "Terkumpul: Rp $totalSaved",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color(0xFFEADDFF)
+                )
+            )
+            Text(
+                text = "Total target: Rp $totalTarget",
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = Color(0xFFEADDFF)
+                )
+            )
+            Text(
+                text = "Sisa: Rp $remaining",
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = Color(0xFFF5F5FF)
+                )
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            LinearProgressIndicator(
+                progress = progress,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(999.dp)),
+                color = Color(0xFFFFD8E4),
+                trackColor = Color(0xFF4A3DB5)
+            )
+        }
     }
 }

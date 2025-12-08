@@ -1,6 +1,7 @@
 package com.example.mywishlist.data.local
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -18,4 +19,7 @@ interface WishlistDao {
 
     @Update
     suspend fun updateItem(item: WishlistItem)
+
+    @Delete
+    suspend fun deleteItem(item: WishlistItem)
 }
