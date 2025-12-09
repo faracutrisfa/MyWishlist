@@ -26,13 +26,12 @@ import com.example.mywishlist.ui.components.EmptyState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-val TextPrimary = Color(0xFF241E49)
-val TextSecondary = Color(0xFF6D6A7C)
+private val TextPrimary = Color(0xFF241E49)
+private val TextSecondary = Color(0xFF6D6A7C)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BudgetScreen() {
-
     val context = LocalContext.current
     val db = remember { WishlistDatabase.getInstance(context) }
     val budgetDao = remember { db.budgetDao() }
@@ -104,114 +103,122 @@ fun BudgetScreen() {
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
+                state = listState,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                item {
+                    SummaryHeader(
+                        weeklyBudget = weeklyBudget,
+                        dailyBudget = dailyBudget,
+                        totalSpent = spentTotal,
+                        remaining = remaining,
+                        progress = progress
+                    )
+                }
 
-                SummaryHeader(
-                    weeklyBudget = weeklyBudget,
-                    dailyBudget = dailyBudget,
-                    totalSpent = spentTotal,
-                    remaining = remaining,
-                    progress = progress
-                )
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = RoundedCornerShape(18.dp),
-                            ambientColor = Color(0x22000000),
-                            spotColor = Color(0x22000000)
-                        ),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Row(
+                item {
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            .shadow(
+                                elevation = 8.dp,
+                                shape = RoundedCornerShape(18.dp),
+                                ambientColor = Color(0x22000000),
+                                spotColor = Color(0x22000000)
+                            ),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
-                        OutlinedTextField(
-                            value = dailyBudgetInput,
-                            onValueChange = {
-                                dailyBudgetInput = it.filter { c -> c.isDigit() }
-                            },
-                            label = {
-                                Text(
-                                    "Budget harian (Rp)",
-                                    color = TextSecondary
-                                )
-                            },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = TextPrimary,
-                                unfocusedTextColor = TextPrimary,
-                                disabledTextColor = TextPrimary,
-                                focusedBorderColor = Color(0xFF6750A4),
-                                unfocusedBorderColor = Color(0xFFCAC4D0),
-                                focusedLabelColor = Color(0xFF6750A4),
-                                unfocusedLabelColor = TextSecondary,
-                                cursorColor = Color(0xFF6750A4)
-                            )
-                        )
-
-                        Button(
-                            onClick = {
-                                val daily = dailyBudgetInput.toLongOrNull() ?: 0L
-                                val weekly = daily * 7
-                                scope.launch {
-                                    budgetDao.upsert(
-                                        BudgetSetting(
-                                            id = 1,
-                                            dailyBudget = daily,
-                                            weeklyBudget = weekly
-                                        )
-                                    )
-                                }
-                            },
-                            enabled = dailyBudgetInput.toLongOrNull() != null,
-                            shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6750A4),
-                                contentColor = Color.White
-                            )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Text("Simpan")
+                            OutlinedTextField(
+                                value = dailyBudgetInput,
+                                onValueChange = {
+                                    dailyBudgetInput = it.filter { c -> c.isDigit() }
+                                },
+                                label = {
+                                    Text(
+                                        "Budget harian (Rp)",
+                                        color = TextSecondary
+                                    )
+                                },
+                                modifier = Modifier.weight(1f),
+                                singleLine = true,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = TextPrimary,
+                                    unfocusedTextColor = TextPrimary,
+                                    disabledTextColor = TextPrimary,
+                                    focusedBorderColor = Color(0xFF6750A4),
+                                    unfocusedBorderColor = Color(0xFFCAC4D0),
+                                    focusedLabelColor = Color(0xFF6750A4),
+                                    unfocusedLabelColor = TextSecondary,
+                                    cursorColor = Color(0xFF6750A4)
+                                )
+                            )
+                            Button(
+                                onClick = {
+                                    val daily = dailyBudgetInput.toLongOrNull() ?: 0L
+                                    val weekly = daily * 7
+                                    scope.launch {
+                                        budgetDao.upsert(
+                                            BudgetSetting(
+                                                id = 1,
+                                                dailyBudget = daily,
+                                                weeklyBudget = weekly
+                                            )
+                                        )
+                                    }
+                                },
+                                enabled = dailyBudgetInput.toLongOrNull() != null,
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF6750A4),
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text("Simpan")
+                            }
                         }
                     }
                 }
 
-                Text(
-                    text = "Pengeluaran yang tercatat",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary
+                item {
+                    Text(
+                        text = "Pengeluaran yang tercatat",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary
+                        )
                     )
-                )
+                }
 
                 if (expenses.isEmpty()) {
-                    EmptyState()
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = listState,
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(expenses, key = { it.id }) { expense ->
-                            ExpenseItemRow(
-                                expense = expense,
-                                onDelete = { deleteTarget = expense }
-                            )
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            EmptyState()
                         }
+                    }
+                } else {
+                    items(expenses, key = { it.id }) { expense ->
+                        ExpenseItemRow(
+                            expense = expense,
+                            onDelete = { deleteTarget = expense }
+                        )
                     }
                 }
             }
@@ -270,7 +277,6 @@ fun BudgetScreen() {
                     Text("Batal", color = TextPrimary)
                 }
             },
-
             containerColor = Color.White,
             titleContentColor = TextPrimary,
             textContentColor = TextSecondary
@@ -284,7 +290,6 @@ private fun ExpenseItemRow(
     onDelete: () -> Unit
 ) {
     val TextPrimary = Color(0xFF241E49)
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -313,7 +318,6 @@ private fun ExpenseItemRow(
                     )
                 )
             }
-
             TextButton(
                 onClick = onDelete,
                 colors = ButtonDefaults.textButtonColors(
@@ -371,7 +375,6 @@ private fun SummaryHeader(
                     fontWeight = FontWeight.SemiBold
                 )
             )
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -420,9 +423,7 @@ private fun SummaryHeader(
                     )
                 }
             }
-
             Spacer(Modifier.height(8.dp))
-
             LinearProgressIndicator(
                 progress = progress,
                 modifier = Modifier
@@ -432,7 +433,6 @@ private fun SummaryHeader(
                 color = Color(0xFFFFD8E4),
                 trackColor = Color.White.copy(alpha = 0.16f)
             )
-
             Text(
                 text = "Terpakai: Rp $totalSpent",
                 style = MaterialTheme.typography.labelSmall.copy(

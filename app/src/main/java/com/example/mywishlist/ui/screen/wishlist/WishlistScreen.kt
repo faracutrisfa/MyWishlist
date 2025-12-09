@@ -33,7 +33,6 @@ private val TextSecondary = Color(0xFF6D6A7C)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WishlistScreen() {
-
     val context = LocalContext.current
     val db = remember { WishlistDatabase.getInstance(context) }
     val dao = remember { db.wishlistDao() }
@@ -57,9 +56,7 @@ fun WishlistScreen() {
     }
 
     val filteredItems = remember(items, selectedCategory, sortOption) {
-        val base = if (selectedCategory == null) items
-        else items.filter { it.category == selectedCategory }
-
+        val base = if (selectedCategory == null) items else items.filter { it.category == selectedCategory }
         when (sortOption) {
             SortOption.NAME -> base.sortedBy { it.name.lowercase() }
             SortOption.PROGRESS -> base.sortedByDescending { it.progress }
@@ -108,190 +105,192 @@ fun WishlistScreen() {
                 .fillMaxSize()
                 .background(Color(0xFFF5F3FF))
         ) {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
+                state = listState,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(
-                            elevation = 12.dp,
-                            shape = RoundedCornerShape(24.dp),
-                            ambientColor = Color(0x22000000),
-                            spotColor = Color(0x22000000)
-                        ),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF6750A4)
-                    )
-                ) {
-                    Column(
+                item {
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        Color(0xFF6750A4),
-                                        Color(0xFF4A3DB5),
-                                        Color(0xFF8E63F4)
-                                    )
-                                )
-                            )
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            .shadow(
+                                elevation = 12.dp,
+                                shape = RoundedCornerShape(24.dp),
+                                ambientColor = Color(0x22000000),
+                                spotColor = Color(0x22000000)
+                            ),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF6750A4)
+                        )
                     ) {
-                        Text(
-                            text = "Halo 👋",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                color = Color(0xFFEADDFF)
-                            )
-                        )
-                        Text(
-                            text = "Capai wishlist kamu pelan-pelan",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                color = Color.White,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        )
-
-                        Spacer(Modifier.height(6.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                Text(
-                                    text = "Terkumpul",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        color = Color(0xFFEADDFF)
-                                    )
-                                )
-                                Text(
-                                    text = "Rp $totalSaved",
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        color = Color.White,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                )
-                            }
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    text = "Target",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        color = Color(0xFFEADDFF)
-                                    )
-                                )
-                                Text(
-                                    text = if (totalTarget == 0L) "—" else "Rp $totalTarget",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        color = Color.White
-                                    )
-                                )
-                            }
-                        }
-
-                        Spacer(Modifier.height(10.dp))
-
-                        LinearProgressIndicator(
-                            progress = overallProgress,
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(999.dp)),
-                            color = Color(0xFFFFD8E4),
-                            trackColor = Color.White.copy(alpha = 0.16f)
-                        )
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(
+                                            Color(0xFF6750A4),
+                                            Color(0xFF4A3DB5),
+                                            Color(0xFF8E63F4)
+                                        )
+                                    )
+                                )
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "Halo 👋",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    color = Color(0xFFEADDFF)
+                                )
+                            )
+                            Text(
+                                text = "Capai wishlist kamu pelan-pelan",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    color = Color.White,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Terkumpul",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = Color(0xFFEADDFF)
+                                        )
+                                    )
+                                    Text(
+                                        text = "Rp $totalSaved",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            color = Color.White,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    )
+                                }
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(
+                                        text = "Target",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = Color(0xFFEADDFF)
+                                        )
+                                    )
+                                    Text(
+                                        text = if (totalTarget == 0L) "—" else "Rp $totalTarget",
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            color = Color.White
+                                        )
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.height(10.dp))
+                            LinearProgressIndicator(
+                                progress = overallProgress,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(8.dp)
+                                    .clip(RoundedCornerShape(999.dp)),
+                                color = Color(0xFFFFD8E4),
+                                trackColor = Color.White.copy(alpha = 0.16f)
+                            )
+                        }
                     }
                 }
 
-                CategoryFilterRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedCategory = selectedCategory,
-                    onCategorySelected = { selectedCategory = it }
-                )
-
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Daftar wishlist",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary
-                        )
+                item {
+                    CategoryFilterRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedCategory = selectedCategory,
+                        onCategorySelected = { selectedCategory = it }
                     )
+                }
 
-                    Box {
-                        FilledTonalButton(
-                            onClick = { sortExpanded = true },
-                            shape = RoundedCornerShape(999.dp),
-                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = Color(0xFFF3EDF7),
-                                contentColor = Color(0xFF4A3DB5)
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Daftar wishlist",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = TextPrimary
                             )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Tune,
-                                contentDescription = null
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                text = sortOption.label,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = sortExpanded,
-                            onDismissRequest = { sortExpanded = false },
-                            containerColor = Color.White,
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            SortOption.values().forEach { option ->
-                                DropdownMenuItem(
-                                    text = { Text(option.label, color = TextPrimary) },
-                                    onClick = {
-                                        sortExpanded = false
-                                        sortOption = option
-                                        scope.launch {
-                                            listState.animateScrollToItem(0)
-                                        }
-                                    }
+                        )
+                        Box {
+                            FilledTonalButton(
+                                onClick = { sortExpanded = true },
+                                shape = RoundedCornerShape(999.dp),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = Color(0xFFF3EDF7),
+                                    contentColor = Color(0xFF4A3DB5)
                                 )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Tune,
+                                    contentDescription = null
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    text = sortOption.label,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = sortExpanded,
+                                onDismissRequest = { sortExpanded = false },
+                                containerColor = Color.White,
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                SortOption.values().forEach { option ->
+                                    DropdownMenuItem(
+                                        text = { Text(option.label, color = TextPrimary) },
+                                        onClick = {
+                                            sortExpanded = false
+                                            sortOption = option
+                                            scope.launch {
+                                                listState.animateScrollToItem(0)
+                                            }
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
                 if (filteredItems.isEmpty()) {
-                    EmptyState()
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = listState,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(filteredItems, key = { it.id }) { item ->
-                            WishlistItemCard(
-                                item = item,
-                                onTogglePurchased = { isPurchased ->
-                                    scope.launch {
-                                        dao.updateItem(item.copy(isPurchased = isPurchased))
-                                    }
-                                },
-                                onAddSavingsClick = { savingsDialogFor = item },
-                                onDeleteClick = { deleteTarget = item }
-                            )
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            EmptyState()
                         }
+                    }
+                } else {
+                    items(filteredItems, key = { it.id }) { item ->
+                        WishlistItemCard(
+                            item = item,
+                            onTogglePurchased = { isPurchased ->
+                                scope.launch {
+                                    dao.updateItem(item.copy(isPurchased = isPurchased))
+                                }
+                            },
+                            onAddSavingsClick = { savingsDialogFor = item },
+                            onDeleteClick = { deleteTarget = item }
+                        )
                     }
                 }
             }
