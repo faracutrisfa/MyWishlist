@@ -14,18 +14,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-
 import com.example.mywishlist.data.local.WishlistDatabase
 import com.example.mywishlist.data.model.ItemCategory
 import com.example.mywishlist.data.model.WishlistItem
 import com.example.mywishlist.ui.components.EmptyState
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
+private val TextPrimary = Color(0xFF241E49)
+private val TextSecondary = Color(0xFF6D6A7C)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +70,7 @@ fun WishlistScreen() {
 
     val totalTarget = remember(items) { items.sumOf { it.targetPrice } }
     val totalSaved = remember(items) { items.sumOf { it.savedAmount } }
+    val overallProgress = if (totalTarget > 0) totalSaved.toFloat() / totalTarget.toFloat() else 0f
 
     Scaffold(
         topBar = {
@@ -74,16 +78,15 @@ fun WishlistScreen() {
                 title = {
                     Text(
                         "MyWishlist",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.SemiBold
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary
                         )
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF6750A4),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = Color.Transparent,
+                    titleContentColor = TextPrimary
                 )
             )
         },
@@ -92,35 +95,127 @@ fun WishlistScreen() {
                 onClick = { showAddDialog = true },
                 containerColor = Color(0xFF6750A4),
                 contentColor = Color.White,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(18.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Tambah item")
             }
-        }
+        },
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(Color(0xFFF5F3FF)) // soft ungu background
+                .background(Color(0xFFF5F3FF))
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                // SUMMARY
-                SummaryHeader(totalTarget = totalTarget, totalSaved = totalSaved)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(
+                            elevation = 12.dp,
+                            shape = RoundedCornerShape(24.dp),
+                            ambientColor = Color(0x22000000),
+                            spotColor = Color(0x22000000)
+                        ),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF6750A4)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        Color(0xFF6750A4),
+                                        Color(0xFF4A3DB5),
+                                        Color(0xFF8E63F4)
+                                    )
+                                )
+                            )
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Halo 👋",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                color = Color(0xFFEADDFF)
+                            )
+                        )
+                        Text(
+                            text = "Capai wishlist kamu pelan-pelan",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
 
-                // FILTER KATEGORI
+                        Spacer(Modifier.height(6.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Terkumpul",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = Color(0xFFEADDFF)
+                                    )
+                                )
+                                Text(
+                                    text = "Rp $totalSaved",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        color = Color.White,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = "Target",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = Color(0xFFEADDFF)
+                                    )
+                                )
+                                Text(
+                                    text = if (totalTarget == 0L) "—" else "Rp $totalTarget",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        color = Color.White
+                                    )
+                                )
+                            }
+                        }
+
+                        Spacer(Modifier.height(10.dp))
+
+                        LinearProgressIndicator(
+                            progress = overallProgress,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(999.dp)),
+                            color = Color(0xFFFFD8E4),
+                            trackColor = Color.White.copy(alpha = 0.16f)
+                        )
+                    }
+                }
+
                 CategoryFilterRow(
+                    modifier = Modifier.fillMaxWidth(),
                     selectedCategory = selectedCategory,
                     onCategorySelected = { selectedCategory = it }
                 )
 
-                // SORT AREA
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -129,41 +224,41 @@ fun WishlistScreen() {
                     Text(
                         text = "Daftar wishlist",
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary
                         )
                     )
 
                     Box {
-                        OutlinedButton(
+                        FilledTonalButton(
                             onClick = { sortExpanded = true },
                             shape = RoundedCornerShape(999.dp),
-                            border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = Color(0xFFF3EDF7)
-                            ),
-                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = Color(0xFFF3EDF7),
+                                contentColor = Color(0xFF4A3DB5)
+                            )
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Tune,
-                                contentDescription = null,
-                                tint = Color(0xFF4A3DB5)
+                                contentDescription = null
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 text = sortOption.label,
-                                style = MaterialTheme.typography.labelLarge,
-                                color = Color(0xFF4A3DB5)
+                                style = MaterialTheme.typography.labelLarge
                             )
                         }
 
                         DropdownMenu(
                             expanded = sortExpanded,
                             onDismissRequest = { sortExpanded = false },
-                            containerColor = Color.White
+                            containerColor = Color.White,
+                            shape = RoundedCornerShape(16.dp)
                         ) {
                             SortOption.values().forEach { option ->
                                 DropdownMenuItem(
-                                    text = { Text(option.label) },
+                                    text = { Text(option.label, color = TextPrimary) },
                                     onClick = {
                                         sortExpanded = false
                                         sortOption = option
@@ -177,14 +272,13 @@ fun WishlistScreen() {
                     }
                 }
 
-                // LIST
                 if (filteredItems.isEmpty()) {
                     EmptyState()
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         state = listState,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(filteredItems, key = { it.id }) { item ->
                             WishlistItemCard(
@@ -204,7 +298,6 @@ fun WishlistScreen() {
         }
     }
 
-    // Dialog – tambah item
     if (showAddDialog) {
         AddItemDialog(
             onDismiss = { showAddDialog = false },
@@ -223,7 +316,6 @@ fun WishlistScreen() {
         )
     }
 
-    // Dialog – tambah tabungan
     savingsDialogFor?.let { item ->
         AddSavingsDialog(
             item = item,
@@ -237,12 +329,16 @@ fun WishlistScreen() {
         )
     }
 
-    // Dialog – hapus
     deleteTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Hapus Wishlist") },
-            text = { Text("Yakin ingin menghapus \"${target.name}\" dari wishlist?") },
+            title = { Text("Hapus Wishlist", color = TextPrimary) },
+            text = {
+                Text(
+                    "Yakin ingin menghapus \"${target.name}\" dari wishlist?",
+                    color = TextSecondary
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -255,81 +351,9 @@ fun WishlistScreen() {
             },
             dismissButton = {
                 TextButton(onClick = { deleteTarget = null }) {
-                    Text("Batal")
+                    Text("Batal", color = TextPrimary)
                 }
             }
         )
-    }
-}
-
-@Composable
-private fun SummaryHeader(
-    totalTarget: Long,
-    totalSaved: Long
-) {
-    val remaining = (totalTarget - totalSaved).coerceAtLeast(0L)
-    val progress = if (totalTarget > 0) totalSaved.toFloat() / totalTarget.toFloat() else 0f
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF6750A4)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF6750A4),
-                            Color(0xFF4A3DB5)
-                        )
-                    )
-                )
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = "Ringkasan tabungan",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold
-                )
-            )
-
-            Text(
-                text = "Terkumpul: Rp $totalSaved",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color(0xFFEADDFF)
-                )
-            )
-            Text(
-                text = "Total target: Rp $totalTarget",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = Color(0xFFEADDFF)
-                )
-            )
-            Text(
-                text = "Sisa: Rp $remaining",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = Color(0xFFF5F5FF)
-                )
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(999.dp)),
-                color = Color(0xFFFFD8E4),
-                trackColor = Color(0xFF4A3DB5)
-            )
-        }
     }
 }

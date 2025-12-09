@@ -4,16 +4,24 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.mywishlist.data.model.BudgetSetting
+import com.example.mywishlist.data.model.Expense
 import com.example.mywishlist.data.model.WishlistItem
 
 @Database(
-    entities = [WishlistItem::class],
-    version = 1,
+    entities = [
+        WishlistItem::class,
+        BudgetSetting::class,
+        Expense::class
+    ],
+    version = 2,
     exportSchema = false
 )
 abstract class WishlistDatabase : RoomDatabase() {
 
     abstract fun wishlistDao(): WishlistDao
+    abstract fun budgetDao(): BudgetDao
+    abstract fun expenseDao(): ExpenseDao
 
     companion object {
         @Volatile
@@ -21,13 +29,14 @@ abstract class WishlistDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): WishlistDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
+                Room.databaseBuilder(
                     context.applicationContext,
                     WishlistDatabase::class.java,
                     "wishlist_db"
-                ).build()
-                INSTANCE = instance
-                instance
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
     }

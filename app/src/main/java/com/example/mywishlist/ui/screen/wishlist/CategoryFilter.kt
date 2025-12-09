@@ -22,7 +22,8 @@ import com.example.mywishlist.data.model.ItemCategory
 @Composable
 fun CategoryFilterRow(
     selectedCategory: ItemCategory?,
-    onCategorySelected: (ItemCategory?) -> Unit
+    onCategorySelected: (ItemCategory?) -> Unit,
+    modifier: Modifier
 ) {
     val scrollState = rememberScrollState()
 
