@@ -26,8 +26,8 @@ import com.example.mywishlist.ui.components.EmptyState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-private val TextPrimary = Color(0xFF241E49)
-private val TextSecondary = Color(0xFF6D6A7C)
+val TextPrimary = Color(0xFF241E49)
+val TextSecondary = Color(0xFF6D6A7C)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -238,8 +238,23 @@ fun BudgetScreen() {
     deleteTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Hapus pengeluaran", color = TextPrimary) },
-            text = { Text("Yakin ingin menghapus \"${target.name}\"?", color = TextSecondary) },
+            title = {
+                Text(
+                    "Hapus pengeluaran",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+                )
+            },
+            text = {
+                Text(
+                    "Yakin ingin menghapus \"${target.name}\"?",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = TextSecondary
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -254,7 +269,11 @@ fun BudgetScreen() {
                 TextButton(onClick = { deleteTarget = null }) {
                     Text("Batal", color = TextPrimary)
                 }
-            }
+            },
+
+            containerColor = Color.White,
+            titleContentColor = TextPrimary,
+            textContentColor = TextSecondary
         )
     }
 }

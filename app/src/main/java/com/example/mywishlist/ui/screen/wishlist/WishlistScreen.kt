@@ -332,11 +332,21 @@ fun WishlistScreen() {
     deleteTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Hapus Wishlist", color = TextPrimary) },
+            title = {
+                Text(
+                    "Hapus Wishlist",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+                )
+            },
             text = {
                 Text(
                     "Yakin ingin menghapus \"${target.name}\" dari wishlist?",
-                    color = TextSecondary
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = TextSecondary
+                    )
                 )
             },
             confirmButton = {
@@ -353,7 +363,10 @@ fun WishlistScreen() {
                 TextButton(onClick = { deleteTarget = null }) {
                     Text("Batal", color = TextPrimary)
                 }
-            }
+            },
+            containerColor = Color.White,
+            titleContentColor = TextPrimary,
+            textContentColor = TextSecondary
         )
     }
 }
